@@ -1,0 +1,11 @@
+openai==0.27.8
+pandas 
+numpy 
+matplotlib 
+tensorflow 
+keras_core 
+keras_cv 
+flask 
+pillow==9.4.0
+bs4 
+scikit-image==0.19.3

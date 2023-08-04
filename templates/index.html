@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GiftAI - The Perfect Gift Recommender</title>
+    <style>
+        /* Global styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+        }
+
+        /* Main container styles */
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border: 6px solid #32CD32; /* Green thick border */
+        }
+
+        /* Heading styles */
+        h1, h2 {
+            text-align: center;
+            font-weight: bold;
+            color: #007BFF;
+            margin: 0;
+        }
+
+        /* Form styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            color: #333333;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Button styles */
+        .btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #007BFF;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .input-hidden {
+            position: absolute;
+            left: -9999px;
+          }
+          
+          input[type=radio]:checked + label>img {
+            border: 1px solid #fff;
+            box-shadow: 0 0 3px 3px #090;
+          }
+          
+          /* Stuff after this is only to make things more pretty */
+          input[type=radio] + label>img {
+            border: 1px dashed #444;
+            width: 160px;
+            height: 160px;
+            transition: 500ms all;
+          }
+          
+          input[type=radio]:checked + label>img {
+            transform: 
+              rotateZ(-10deg) 
+              rotateX(10deg);
+          }
+
+          .gifts{
+            display: inline-block;
+            margin-top: 25px;
+          }
+          
+          .gift{
+            display: inline-block;
+          }
+
+          .gift>label{
+            cursor: pointer;
+          }
+
+          .submit_btn {
+            display: block;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #007BFF;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+          .images{
+            display: inline-block;
+            margin-top: 25px;
+            
+          }
+
+          .image{
+            display: inline-block;
+            margin: 5px;
+            padding: 15px;
+            }
+
+            .image>label{
+                cursor: pointer;
+            }
+
+            .products{
+                display: inline-block;
+                margin-top: 25px;
+                
+              }
+    
+            .product{
+            display: inline-block;
+            margin: 5px;
+            padding: 15px;
+            width: 28%;
+            }
+
+            .product>img{
+                    max-width: 157px;
+                    max-height: 157px;
+                }
+            
+            #loader {
+                border: 12px solid #f3f3f3;
+                border-radius: 50%;
+                border-top: 12px solid #444444;
+                width: 70px;
+                height: 70px;
+                animation: spin 1s linear infinite;
+                
+            }
+        
+            .center {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                margin: auto;
+                visibility:hidden;
+                z-index: 99999;
+                background: rgba(0,0,0,0.2);
+            }
+        
+            @keyframes spin {
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+          
+    </style>
+</head>
+<body>
+    <div id="loader" class="center"></div>
+    <div class="container">
+        <h1 style="font-size: 48px;">iGift</h1>
+        <h2 style="font-size: 24px;">The Perfect Gift Recommender</h2>
+
+        <div class="form-group">
+            <label for="occasion">Type of Occasion:</label>
+            <input type="text" id="occasion" name="occasion" placeholder="Enter the occasion...">
+        </div>
+
+        <div class="form-group">
+            <label for="budget">Budget ($):</label>
+            <input type="text" name="budget" id="budget" placeholder="Enter your budget (number only)">
+        </div>
+
+        <div class="form-group" style="text-align: center;">
+            <label style="font-size: 18px;">Gift Receiver's Attributes</label>
+            <p style="font-size: 14px;">(gender, age, interests, separated by commas)</p>
+            <textarea name="attributes" id="attributes" rows="5" style="width: 100%; max-width: 400px;" placeholder="Enter receiver attributes separated by commas"></textarea>
+        </div>
+
+        <button class="btn" onclick="submitData()">Done</button>
+        <div id="gifts">
+        </div>
+        <div id='images'>
+
+        </div>
+
+        <div id='products'>
+
+        </div>
+
+    </div>
+
+    <script>
+        function submitData() {
+            
+            var gf = document.getElementById('gifts')
+            gf.innerText=''
+
+            var ig = document.getElementById('images')
+            ig.innerText=''
+
+            var prod = document.getElementById('products')
+            prod.innerText=''
+
+            
+
+            var occasion = document.getElementById("occasion").value;
+            budget = document.getElementById("budget").value;
+            var attributes = document.getElementById("attributes").value;
+
+            if(!budget||!attributes){
+                alert('Oops!!! You forgot to fill some details above.');
+                return;
+            }
+
+            document.querySelector("#loader").style.visibility = "visible";
+            
+            fetch('/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 'occasion': occasion, 'budget':budget, 'attributes':attributes })
+            })
+            .then(response => response.json())
+            .then(data => {
+
+
+                let Gifts= document.getElementById('gifts')
+                Gifts.classList.add("gifts");
+                let btn = document.createElement('button');
+                btn.innerText='Submit Selection';
+                btn.id = 'submit_btn';
+                btn.classList.add("submit_btn");
+
+                let title = document.createElement("label");
+                title.innerText = "Which of these suggestion interest you?";
+
+                Gifts.appendChild(title)
+
+                
+
+                //console.log(data)
+                //document.getElementById("prediction-result").innerText = "Prediction: " + predictionResult;
+                for (let gift in data) {
+
+                    let div = document.createElement('div');
+                    div.classList.add("gift");
+                    
+                    let label = document.createElement("label");
+                    //label.innerText = data[gift];
+                    let span = document.createElement("span");
+                    span.innerText = data[gift];
+                    let input = document.createElement("input");
+                    input.type = "radio";
+                    input.value = data[gift];
+                    input.name = 'gift';
+                    label.appendChild(input);
+                    label.appendChild(span);
+                    div.appendChild(label);
+                    Gifts.appendChild(div);
+                    
+                }
+
+                Gifts.appendChild(btn);
+
+                document.querySelector("#loader").style.visibility = "hidden";
+
+                const bt = document.querySelector('#submit_btn');        
+                const radioButtons = document.querySelectorAll('input[name="gift"]');
+                bt.addEventListener("click", () => {
+                    //alert('here');
+                    var ig = document.getElementById('images')
+                    ig.innerText=''
+                    var prod = document.getElementById('products')
+                    prod.innerText=''
+
+                    let selectedGift;
+                    for (const radioButton of radioButtons) {
+                        if (radioButton.checked) {
+                            selectedGift = radioButton.value;
+                            break;
+                        }
+                    }
+                    // show the output:
+                    //output.innerText = selectedSize ? `You selected ${selectedSize}` : `You haven't selected any size`;
+                    selectedGift ? getImage(selectedGift) : '';
+                });
+            })
+            .catch(error => {
+                document.querySelector("#loader").style.visibility = "hidden";
+                console.error('Error:', error);
+                alert('Oops!!! Something went wrong, reload and try again');
+            });
+        }
+
+
+        function getImage(gift,xla=false) {
+            alert(xla);
+            document.querySelector("#loader").style.visibility = "visible";
+
+            fetch('/image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 'gift': gift, 'xla':xla })
+            })
+            .then(res => res.json())
+            .then(response => {
+                //console.log(response);
+
+                let images= document.getElementById('images')
+                images.classList.add("images");
+                let btn = document.createElement('button');
+                btn.innerText='Submit Selection';
+                btn.id = 'submit_img';
+                btn.classList.add("submit_btn");
+
+                let title = document.createElement("label");
+                title.innerText = "Which of these generated gift's images do you like? (Click one)";
+
+                images.appendChild(title)
+
+                for (let img in response) {
+                    
+                    let div = document.createElement('div');
+                    div.classList.add("image");
+
+                    let input = document.createElement("input");
+                    input.type = "radio";
+                    input.name = 'gen_image';
+                    input.classList.add("input-hidden");
+                    input.id=response[img]
+                    input.value=response[img]
+
+                    let label = document.createElement("label");
+                    label.htmlFor = response[img]
+
+
+                    let span = document.createElement("span");
+                    span.innerText = response[img];
+
+                    let image = document.createElement("img");
+                    image.src = '/static/images/'+response[img];
+                    image.width=157;
+                    image.height=157;
+
+                    div.appendChild(input);
+                    label.appendChild(image);
+                    div.appendChild(label);
+
+                    images.appendChild(div);
+
+                    
+
+                    
+                }
+
+                images.appendChild(btn)
+
+                document.querySelector("#loader").style.visibility = "hidden";
+
+                const bt = document.querySelector('#submit_img');        
+                const radioButtons = document.querySelectorAll('input[name="gen_image"]');
+                bt.addEventListener("click", () => {
+                    var prod = document.getElementById('products')
+                    prod.innerText=''
+
+                    if(!budget){
+                        alert('Oops!!! You forgot to fill some details above.');
+                        return;
+                    }
+                    
+                    let selectedImage;
+                    for (const radioButton of radioButtons) {
+                        if (radioButton.checked) {
+                            selectedImage = radioButton.value;
+                            break;
+                        }
+                    }
+
+                    //alert(selectedImage+'_'+gift+'_'+budget);
+
+                    selectedImage ? getFinalProducts(gift,budget,selectedImage) : '';
+                });
+            })
+            .catch(error => {
+                document.querySelector("#loader").style.visibility = "hidden";
+                console.error('Error:', error);
+                alert('Oops!!! Something went wrong, reload and try again');
+            });
+        }
+
+
+
+        function getFinalProducts(gift_name, budget, image_path) {
+
+            document.querySelector("#loader").style.visibility = "visible";
+
+            fetch('/products', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify( {'gift_name': gift_name, 'budget': budget, 'image_path': image_path})
+            })
+            .then(res => res.json())
+            .then(response => {
+                //console.log(response);
+                let products= document.getElementById('products')
+                products.classList.add("products");
+
+                let label = document.createElement("label");
+                label.innerText = "Our Recommended Gifts:";
+
+                products.appendChild(label)
+
+                for (let prod in response) {
+                    
+                    let div = document.createElement('div');
+                    div.classList.add("product");
+
+                    let title = document.createElement("p");
+                    title.innerText = response[prod]['Title'];
+
+
+                    let link = document.createElement("span");
+                    link.innerText = response[prod]['Link'];
+                    var a = document.createElement('a');
+                    var linkText = document.createTextNode("Get Product Details");
+                    a.appendChild(linkText);
+                    a.title = "Product link";
+                    a.href = response[prod]['Link'];
+                    a.target="_blank";
+
+                    let price = document.createElement("p");
+                    price.innerText = "Price: $ "+response[prod]['Price'];
+
+                    let image = document.createElement("img");
+                    image.src = response[prod]['Image'];
+
+                    div.appendChild(title);
+                    div.appendChild(image);
+                    div.appendChild(price);
+                    div.appendChild(a);
+
+                    products.appendChild(div);
+
+                    
+                }
+
+                document.querySelector("#loader").style.visibility = "hidden";
+            })
+            .catch(error => {
+                document.querySelector("#loader").style.visibility = "hidden";
+                console.error('Error:', error);
+                alert('Oops!!! Something went wrong, reload and try again');
+            });
+        }
+        
+
+        
+
+    </script>
+</body>
+</html>
